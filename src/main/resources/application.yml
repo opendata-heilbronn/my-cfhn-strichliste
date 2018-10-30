@@ -1,0 +1,30 @@
+spring:
+  ldap:
+    urls: ldaps://ldap.cfhn.it
+    base: dc=cfhn,dc=it
+    username: cn=admin,dc=cfhn,dc=it
+  data:
+    mongodb:
+      host: mongodb
+      port: 27017
+      database: strichliste
+cfhn:
+  auth:
+    loginUrl: https://login.my.cfhn.it/
+    redirectUrl: http://local.my.cfhn.it:8080/
+    cookieName: cfhn
+    publicKeyUrl: https://login.my.cfhn.it/jwt/public-key
+management:
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: info, health, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

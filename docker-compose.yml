@@ -1,0 +1,32 @@
+version: '2'
+services:
+  mongo:
+    image: mongodb
+    volumes:
+    - dbdata:/data/db
+  strichliste:
+    image: repo.cfhn.it/mycfhn/strichliste-ms/strichliste-ms
+    environment:
+      JAVA_OPTS: "-Dspring.ldap.password=$ldapPassword -Dspring.profiles.active=cfhnAuth -Dcfhn.auth.redirectUrl=https://strichliste.my.cfhn.it/"
+    networks:
+      - default
+      - traefik_net
+      - prometheus_net
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik_net"
+      traefik.port: "8080"
+      traefik.frontend.rule: "Host:strichliste.my.cfhn.it"
+      prometheus.enable: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/actuator/health"]
+    restart: always
+networks:
+  traefik_net:
+    external: true
+  prometheus_net:
+    external: true
+volumes:
+  dbdata:
