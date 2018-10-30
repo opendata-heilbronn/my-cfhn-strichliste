@@ -1,7 +1,7 @@
 version: '2.3'
 services:
   mongo:
-    image: mongodb
+    image: mongo
     volumes:
     - dbdata:/data/db
   strichliste:
