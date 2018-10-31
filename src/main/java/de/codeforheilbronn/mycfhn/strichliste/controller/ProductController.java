@@ -18,6 +18,7 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
+    @Authenticated
     public List<ProductModel> getProducts() {
         return productService.getProducts();
     }
