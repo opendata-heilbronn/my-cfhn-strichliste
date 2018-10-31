@@ -1,5 +1,6 @@
 package de.codeforheilbronn.mycfhn.strichliste.controller;
 
+import de.codeforheilbronn.mycfhn.strichliste.auth.Authenticated;
 import de.codeforheilbronn.mycfhn.strichliste.model.api.UserModel;
 import de.codeforheilbronn.mycfhn.strichliste.service.UserService;
 import lombok.AllArgsConstructor;
@@ -16,11 +17,13 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
+    @Authenticated
     public List<UserModel> getUsers() {
         return userService.getUserOverview();
     }
 
     @PostMapping("{username}/consumption")
+    @Authenticated
     public UserModel consume(
             @PathVariable String username,
             @RequestBody Map<String, Long> consumption
@@ -29,6 +32,7 @@ public class UserController {
     }
 
     @PostMapping("{username}/balance")
+    @Authenticated
     public UserModel pay(
             @PathVariable String username,
             @RequestBody Long amount
