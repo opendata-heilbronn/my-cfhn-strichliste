@@ -1,5 +1,6 @@
 package de.codeforheilbronn.mycfhn.strichliste.service;
 
+import de.codeforheilbronn.mycfhn.strichliste.controller.ResourceAlreadyExistsException;
 import de.codeforheilbronn.mycfhn.strichliste.model.api.UserModel;
 import de.codeforheilbronn.mycfhn.strichliste.model.persistence.Product;
 import de.codeforheilbronn.mycfhn.strichliste.model.persistence.User;
@@ -7,6 +8,7 @@ import de.codeforheilbronn.mycfhn.strichliste.repository.ProductRepository;
 import de.codeforheilbronn.mycfhn.strichliste.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -30,7 +32,7 @@ public class UserService {
 
     public List<UserModel> getUserOverview() {
         Map<ObjectId, Product> products = getProducts();
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAll(Sort.by(Sort.Direction.DESC, "isCfhn").and(Sort.by(Sort.Direction.ASC, "username")));
         return users.stream()
                 .map(user -> toModel(user, products))
                 .collect(Collectors.toList());
@@ -71,7 +73,7 @@ public class UserService {
 
     private Update buildUpdates(Map<String, Long> products) {
         Update update = new Update();
-        for(Map.Entry<String, Long> product : products.entrySet()) {
+        for (Map.Entry<String, Long> product : products.entrySet()) {
             update = update.inc("consumption." + product.getKey(), product.getValue());
         }
         return update;
@@ -80,5 +82,24 @@ public class UserService {
     public Optional<UserModel> pay(String username, Long amount) {
         mongoTemplate.updateFirst(Query.query(where("username").is(username)), new Update().inc("balance", amount), User.class);
         return userRepository.findByUsername(username).map(user -> toModel(user, getProducts()));
+    }
+
+    public UserModel createGuest(String guestName) {
+        if (userRepository.existsByUsername(guestName)) {
+            throw new ResourceAlreadyExistsException(guestName);
+        }
+
+        User user = new User(guestName, false);
+        return toModel(userRepository.save(user), getProducts());
+    }
+
+    public Optional<UserModel> deleteGuest(String guestName) {
+        return userRepository.findByUsername(guestName)
+                .filter(user -> !user.isCfhn())
+                .map(user -> {
+                    UserModel model = toModel(user, getProducts());
+                    userRepository.delete(user);
+                    return model;
+                });
     }
 }

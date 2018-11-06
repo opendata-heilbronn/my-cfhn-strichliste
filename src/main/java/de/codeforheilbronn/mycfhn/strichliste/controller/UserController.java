@@ -1,6 +1,8 @@
 package de.codeforheilbronn.mycfhn.strichliste.controller;
 
 import de.codeforheilbronn.mycfhn.strichliste.auth.Authenticated;
+import de.codeforheilbronn.mycfhn.strichliste.auth.Authorized;
+import de.codeforheilbronn.mycfhn.strichliste.model.api.GuestCreateRequest;
 import de.codeforheilbronn.mycfhn.strichliste.model.api.UserModel;
 import de.codeforheilbronn.mycfhn.strichliste.service.UserService;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,23 @@ public class UserController {
     @Authenticated
     public List<UserModel> getUsers() {
         return userService.getUserOverview();
+    }
+
+    @PostMapping
+    @Authenticated
+    public UserModel createGuest(
+            @RequestBody GuestCreateRequest guestCreateRequest
+    ) {
+        return userService.createGuest(guestCreateRequest.getUsername());
+    }
+
+    @DeleteMapping("{guestName}")
+    @Authenticated
+    @Authorized(groups = {"boardMembers", "infrastructureAdmins"})
+    public UserModel deleteGuest(
+            @PathVariable String guestName
+    ) {
+        return userService.deleteGuest(guestName).orElseThrow(() -> new ResourceNotFoundException(guestName));
     }
 
     @PostMapping("{username}/consumption")
