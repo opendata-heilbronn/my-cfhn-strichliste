@@ -1,6 +1,7 @@
 package de.codeforheilbronn.mycfhn.strichliste.controller;
 
 import de.codeforheilbronn.mycfhn.strichliste.auth.Authenticated;
+import de.codeforheilbronn.mycfhn.strichliste.auth.Authorized;
 import de.codeforheilbronn.mycfhn.strichliste.model.api.GuestCreateRequest;
 import de.codeforheilbronn.mycfhn.strichliste.model.api.UserModel;
 import de.codeforheilbronn.mycfhn.strichliste.service.UserService;
@@ -33,6 +34,7 @@ public class UserController {
 
     @DeleteMapping("{guestName}")
     @Authenticated
+    @Authorized(groups = {"boardMembers", "infrastructureAdmins"})
     public UserModel deleteGuest(
             @PathVariable String guestName
     ) {
