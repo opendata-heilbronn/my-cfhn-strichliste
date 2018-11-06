@@ -123,9 +123,7 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compilerArgs>
-                        <parameters>true</parameters>
-                    </compilerArgs>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>
