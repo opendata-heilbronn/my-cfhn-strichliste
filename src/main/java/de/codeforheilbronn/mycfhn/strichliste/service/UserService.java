@@ -29,6 +29,7 @@ public class UserService {
     private UserRepository userRepository;
     private ProductRepository productRepository;
     private MongoTemplate mongoTemplate;
+    private LoggingService loggingService;
 
     public List<UserModel> getUserOverview() {
         Map<ObjectId, Product> products = getProducts();
@@ -68,6 +69,7 @@ public class UserService {
 
     public Optional<UserModel> consume(String username, Map<String, Long> products) {
         mongoTemplate.updateFirst(Query.query(where("username").is(username)), buildUpdates(products), User.class);
+        loggingService.logConsumption(username, products);
         return userRepository.findByUsername(username).map(user -> toModel(user, getProducts()));
     }
 
@@ -81,6 +83,7 @@ public class UserService {
 
     public Optional<UserModel> pay(String username, Long amount) {
         mongoTemplate.updateFirst(Query.query(where("username").is(username)), new Update().inc("balance", amount), User.class);
+        loggingService.logPayment(username, amount);
         return userRepository.findByUsername(username).map(user -> toModel(user, getProducts()));
     }
 

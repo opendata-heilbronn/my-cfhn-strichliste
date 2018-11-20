@@ -93,18 +93,24 @@ public class CfhnAuthenticationService {
     }
 
     public void ensureAnyGroupMember(String... groupCn) {
+        if(!hasAnyGroupMember(groupCn)) {
+            throwAccessDenied();
+        }
+    }
+
+    public boolean hasAnyGroupMember(String... groupCn) {
         Optional<TokenData> tokenData = getUserData();
         if (!tokenData.isPresent()) {
-            throwAccessDenied();
+            return false;
         }
 
         List<String> groups = tokenData.get().getGroups();
         for (String group : groupCn) {
             if (groups.stream().anyMatch(g -> g.startsWith("cn=" + group))) {
-                return;
+                return true;
             }
         }
-        throwAccessDenied();
+        return false;
     }
 
     private void throwAccessDenied() {
